@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlightPluto - Cities</title>
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- Font Awesome 5 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card-header { background: linear-gradient(45deg, #007bff, #0056b3); color: white; border-radius: 15px 15px 0 0 !important; }
+        .btn-primary { background: linear-gradient(45deg, #007bff, #0056b3); border: none; }
+        .btn-success { background: linear-gradient(45deg, #28a745, #218838); border: none; }
+        .table thead th { border-top: none; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter mr-2"></i>Filter Options</h5>
+        </div>
+        <div class="card-body">
+            <div id="filter_notifications"></div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="filter_country">Country</label>
+                        <select id="filter_country" class="form-control form-control-sm">
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="filter_city_name">City Name</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="filter_city_name" class="form-control" placeholder="Search city...">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" id="btn_search_cities">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-striped table-hover" id="cities_table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Country</th>
+                            <th>City Name</th>
+                            <th>Airports</th>
+                            <th>Airlines</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cities_list">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-success btn-sm mt-3" id="btn_add_city">
+                <i class="fas fa-plus mr-1"></i> Add New City
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- City Details Modal -->
+<div class="modal fade" id="city_modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_title">City Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="modal_notifications"></div>
+                <input type="hidden" id="city_id" value="0">
+                <div class="form-group">
+                    <label for="city_country">Country</label>
+                    <select id="city_country" class="form-control">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="city_name">City Name</label>
+                    <input type="text" id="city_name" class="form-control" placeholder="Enter city name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success btn-sm" id="btn_save_city">
+                    <i class="fas fa-save mr-1"></i> Save
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/city.js"></script>
+</body>
+</html>

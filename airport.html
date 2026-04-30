@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlightPluto - Airports</title>
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- Font Awesome 5 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007bff;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --info: #17a2b8;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Inter', sans-serif;
+            color: #1a1a1a;
+            overflow-x: hidden;
+        }
+
+        .container-fluid {
+            padding: 2rem;
+        }
+
+        /* Glassmorphism Cards */
+        .card {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card-header {
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        }
+
+        .card-title {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* Form Styling */
+        .form-control {
+            border-radius: 0.75rem;
+            border: 1px solid #e0e0e0;
+            padding: 0.6rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+            border-color: var(--primary);
+        }
+
+        .input-group-text {
+            border-radius: 0.75rem 0 0 0.75rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 0.75rem;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            border: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Table Styling */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: rgba(0, 0, 0, 0.02);
+            border-top: none;
+            border-bottom: 2px solid #eee;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            color: var(--secondary);
+            padding: 1.25rem;
+        }
+
+        .table tbody td {
+            padding: 1.25rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .badge-pill {
+            padding: 0.4rem 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal-content {
+            border-radius: 1.5rem;
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #eee;
+            padding: 1.5rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid animate-fadeIn">
+    <!-- Header/Filter Section -->
+    <div class="card">
+        <div class="card-header bg-gradient-primary d-flex justify-content-between align-items-center text-white">
+            <h5 class="mb-0"><i class="fas fa-plane-departure mr-2"></i>Airport Management</h5>
+            <div id="filter_notifications"></div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="small font-weight-bold text-uppercase">Filter by City</label>
+                        <select id="filter_city" class="form-control">
+                            <option value="">All Cities</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="small font-weight-bold text-uppercase">Search Airport</label>
+                        <div class="input-group">
+                            <input type="text" id="filter_airport_name" class="form-control" placeholder="Search by name or IATA code...">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" id="btn_search_airports">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <div class="form-group w-100">
+                        <button class="btn btn-success btn-block" id="btn_add_airport">
+                            <i class="fas fa-plus mr-2"></i>Add Airport
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Section -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover" id="airports_table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Airport Name</th>
+                            <th>IATA Code</th>
+                            <th>City</th>
+                            <th>Country</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="airports_list">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Airport Modal -->
+<div class="modal fade" id="airport_modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_title">Airport Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="modal_notifications"></div>
+                <input type="hidden" id="airport_id" value="0">
+                <div class="form-group mb-3">
+                    <label class="small font-weight-bold">City Location</label>
+                    <select id="airport_city" class="form-control">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="small font-weight-bold">Airport Name</label>
+                    <input type="text" id="airport_name" class="form-control" placeholder="e.g. Heathrow Airport">
+                </div>
+                <div class="form-group mb-0">
+                    <label class="small font-weight-bold">IATA Code</label>
+                    <input type="text" id="airport_iata" class="form-control" maxlength="3" placeholder="e.g. LHR">
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="btn_save_airport">
+                    <i class="fas fa-save mr-2"></i>Save Airport
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/airport.js"></script>
+</body>
+</html>
