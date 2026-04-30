@@ -3,35 +3,31 @@ require_once("db.php");
 
 class Airport extends Db {
 
-    function checkAirport($airportid, $airportname) {
-        $sql = "CALL `sp_checkairport`({$airportid},'{$airportname}')";
-        return $this->getData($sql)->rowCount();
+    public function saveAirport($airport_name, $iata, $city_id) {
+        $sql = "CALL sp_Airport_Create(?, ?, ?)";
+        return $this->getJSON($sql, [$airport_name, $iata, $city_id]);
     }
 
-    function saveAirport($airportid, $airportname, $iata, $cityid) {
-        if ($this->checkAirport($airportid, $airportname)) {
-            return ["status" => "exists", "message" => "airport already exists"];
-        } else {
-            $sql = "CALL `sp_saveairport`({$airportid},'{$airportname}','{$iata}',{$cityid})";
-            $this->getData($sql);
-            return ["status" => "success", "message" => "airport saved successfully"];
-        }
+    public function updateAirport($airport_id, $airport_name, $iata, $city_id) {
+        $sql = "CALL sp_Airport_Update(?, ?, ?, ?)";
+        $this->execute($sql, [$airport_id, $airport_name, $iata, $city_id]);
+        return json_encode(["status" => "success", "message" => "Airport updated successfully"]);
     }
 
-    function getAirports() {
-        $sql = "CALL `sp_getairports`()";
+    public function getAirports() {
+        $sql = "CALL sp_Airport_SelectAll()";
         return $this->getJSON($sql);
     }
 
-    function getAirportDetails($airportid) {
-        $sql = "CALL `sp_getairportdetails`({$airportid})";
-        return $this->getJSON($sql);
+    public function getAirportDetails($airport_id) {
+        $sql = "CALL sp_Airport_SelectByID(?)";
+        return $this->getJSON($sql, [$airport_id]);
     }
 
-    function deleteAirport($airportid) {
-        $sql = "CALL `sp_deleteairport`({$airportid})";
-        $this->getData($sql);
-        return ["status" => "success", "message" => "the airport was deleted successfully"];
+    public function deleteAirport($airport_id) {
+        $sql = "CALL sp_Airport_Delete(?)";
+        $this->execute($sql, [$airport_id]);
+        return json_encode(["status" => "success", "message" => "Airport deleted successfully"]);
     }
 }
 ?>

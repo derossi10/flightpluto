@@ -3,35 +3,32 @@ require_once("db.php");
 
 class Passenger extends Db {
 
-    function checkPassenger($passengerid, $passport) {
-        $sql = "CALL `sp_checkpassenger`({$passengerid},'{$passport}')";
-        return $this->getData($sql)->rowCount();
+    public function savePassenger($first_name, $last_name, $dob, $passport, $email, $phone) {
+        $sql = "CALL sp_Passenger_Create(?, ?, ?, ?, ?, ?)";
+        return $this->getJSON($sql, [$first_name, $last_name, $dob, $passport, $email, $phone]);
     }
 
-    function savePassenger($passengerid, $firstname, $lastname, $dob, $passport, $email, $phone) {
-        if ($this->checkPassenger($passengerid, $passport)) {
-            return ["status" => "exists", "message" => "passenger already exists"];
-        } else {
-            $sql = "CALL `sp_savepassenger`({$passengerid},'{$firstname}','{$lastname}','{$dob}','{$passport}','{$email}','{$phone}')";
-            $this->getData($sql);
-            return ["status" => "success", "message" => "passenger saved successfully"];
-        }
+    public function updatePassenger($passenger_id, $first_name, $last_name, $dob, $passport, $email, $phone) {
+        $sql = "CALL sp_Passenger_Update(?, ?, ?, ?, ?, ?, ?)";
+        $this->execute($sql, [$passenger_id, $first_name, $last_name, $dob, $passport, $email, $phone]);
+        return json_encode(["status" => "success", "message" => "Passenger updated successfully"]);
     }
 
-    function getPassengers() {
-        $sql = "CALL `sp_getpassengers`()";
+    public function getPassengers() {
+        $sql = "CALL sp_Passenger_SelectAll()";
         return $this->getJSON($sql);
     }
 
-    function getPassengerDetails($passengerid) {
-        $sql = "CALL `sp_getpassengerdetails`({$passengerid})";
-        return $this->getJSON($sql);
+    public function getPassengerDetails($passenger_id) {
+        $sql = "CALL sp_Passenger_SelectByID(?)";
+        return $this->getJSON($sql, [$passenger_id]);
     }
 
-    function deletePassenger($passengerid) {
-        $sql = "CALL `sp_deletepassenger`({$passengerid})";
-        $this->getData($sql);
-        return ["status" => "success", "message" => "the passenger was deleted successfully"];
+    public function deletePassenger($passenger_id) {
+        $sql = "CALL sp_Passenger_Delete(?)";
+        $this->execute($sql, [$passenger_id]);
+        return json_encode(["status" => "success", "message" => "Passenger deleted successfully"]);
     }
 }
 ?>
+

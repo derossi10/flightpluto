@@ -3,35 +3,31 @@ require_once("db.php");
 
 class City extends Db {
 
-    function checkCity($cityid, $cityname) {
-        $sql = "CALL `sp_checkcity`({$cityid},'{$cityname}')";
-        return $this->getData($sql)->rowCount();
+    public function saveCity($city_name, $country_id) {
+        $sql = "CALL sp_City_Create(?, ?)";
+        return $this->getJSON($sql, [$city_name, $country_id]);
     }
 
-    function saveCity($cityid, $cityname, $countryid) {
-        if ($this->checkCity($cityid, $cityname)) {
-            return ["status" => "exists", "message" => "city name already exists"];
-        } else {
-            $sql = "CALL `sp_savecity`({$cityid},'{$cityname}',{$countryid})";
-            $this->getData($sql);
-            return ["status" => "success", "message" => "city saved successfully"];
-        }
+    public function updateCity($city_id, $city_name, $country_id) {
+        $sql = "CALL sp_City_Update(?, ?, ?)";
+        $this->execute($sql, [$city_id, $city_name, $country_id]);
+        return json_encode(["status" => "success", "message" => "City updated successfully"]);
     }
 
-    function getCities() {
-        $sql = "CALL `sp_getcities`()";
+    public function getCities() {
+        $sql = "CALL sp_City_SelectAll()";
         return $this->getJSON($sql);
     }
 
-    function getCityDetails($cityid) {
-        $sql = "CALL `sp_getcitydetails`({$cityid})";
-        return $this->getJSON($sql);
+    public function getCityDetails($city_id) {
+        $sql = "CALL sp_City_SelectByID(?)";
+        return $this->getJSON($sql, [$city_id]);
     }
 
-    function deleteCity($cityid) {
-        $sql = "CALL `sp_deletecity`({$cityid})";
-        $this->getData($sql);
-        return ["status" => "success", "message" => "the city was deleted successfully"];
+    public function deleteCity($city_id) {
+        $sql = "CALL sp_City_Delete(?)";
+        $this->execute($sql, [$city_id]);
+        return json_encode(["status" => "success", "message" => "City deleted successfully"]);
     }
 }
 ?>

@@ -3,35 +3,31 @@ require_once("db.php");
 
 class Airline extends Db {
 
-    function checkAirline($airlineid, $airlinename) {
-        $sql = "CALL `sp_checkairline`({$airlineid},'{$airlinename}')";
-        return $this->getData($sql)->rowCount();
+    public function saveAirline($airline_name, $iata, $icao, $country_id) {
+        $sql = "CALL sp_Airline_Create(?, ?, ?, ?)";
+        return $this->getJSON($sql, [$airline_name, $iata, $icao, $country_id]);
     }
 
-    function saveAirline($airlineid, $airlinename, $iata, $icao, $countryid) {
-        if ($this->checkAirline($airlineid, $airlinename)) {
-            return ["status" => "exists", "message" => "airline already exists"];
-        } else {
-            $sql = "CALL `sp_saveairline`({$airlineid},'{$airlinename}','{$iata}','{$icao}',{$countryid})";
-            $this->getData($sql);
-            return ["status" => "success", "message" => "airline saved successfully"];
-        }
+    public function updateAirline($airline_id, $airline_name, $iata, $icao, $country_id) {
+        $sql = "CALL sp_Airline_Update(?, ?, ?, ?, ?)";
+        $this->execute($sql, [$airline_id, $airline_name, $iata, $icao, $country_id]);
+        return json_encode(["status" => "success", "message" => "Airline updated successfully"]);
     }
 
-    function getAirlines() {
-        $sql = "CALL `sp_getairlines`()";
+    public function getAirlines() {
+        $sql = "CALL sp_Airline_SelectAll()";
         return $this->getJSON($sql);
     }
 
-    function getAirlineDetails($airlineid) {
-        $sql = "CALL `sp_getairlinedetails`({$airlineid})";
-        return $this->getJSON($sql);
+    public function getAirlineDetails($airline_id) {
+        $sql = "CALL sp_Airline_SelectByID(?)";
+        return $this->getJSON($sql, [$airline_id]);
     }
 
-    function deleteAirline($airlineid) {
-        $sql = "CALL `sp_deleteairline`({$airlineid})";
-        $this->getData($sql);
-        return ["status" => "success", "message" => "the airline was deleted successfully"];
+    public function deleteAirline($airline_id) {
+        $sql = "CALL sp_Airline_Delete(?)";
+        $this->execute($sql, [$airline_id]);
+        return json_encode(["status" => "success", "message" => "Airline deleted successfully"]);
     }
 }
 ?>

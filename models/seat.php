@@ -3,35 +3,31 @@ require_once("db.php");
 
 class Seat extends Db {
 
-    function checkSeat($seatid, $seatnumber) {
-        $sql = "CALL `sp_checkseat`({$seatid},'{$seatnumber}')";
-        return $this->getData($sql)->rowCount();
+    public function saveSeat($flight_id, $flight_class_id, $seat_number, $availability_status) {
+        $sql = "CALL sp_Seat_Create(?, ?, ?, ?)";
+        return $this->getJSON($sql, [$flight_id, $flight_class_id, $seat_number, $availability_status]);
     }
 
-    function saveSeat($seatid, $flightid, $classid, $seatnumber, $status) {
-        if ($this->checkSeat($seatid, $seatnumber)) {
-            return ["status" => "exists", "message" => "seat already exists"];
-        } else {
-            $sql = "CALL `sp_saveseat`({$seatid},{$flightid},{$classid},'{$seatnumber}','{$status}')";
-            $this->getData($sql);
-            return ["status" => "success", "message" => "seat saved successfully"];
-        }
+    public function updateSeat($seat_id, $flight_id, $flight_class_id, $seat_number, $availability_status) {
+        $sql = "CALL sp_Seat_Update(?, ?, ?, ?, ?)";
+        $this->execute($sql, [$seat_id, $flight_id, $flight_class_id, $seat_number, $availability_status]);
+        return json_encode(["status" => "success", "message" => "Seat updated successfully"]);
     }
 
-    function getSeats() {
-        $sql = "CALL `sp_getseats`()";
+    public function getSeats() {
+        $sql = "CALL sp_Seat_SelectAll()";
         return $this->getJSON($sql);
     }
 
-    function getSeatDetails($seatid) {
-        $sql = "CALL `sp_getseatdetails`({$seatid})";
-        return $this->getJSON($sql);
+    public function getSeatDetails($seat_id) {
+        $sql = "CALL sp_Seat_SelectByID(?)";
+        return $this->getJSON($sql, [$seat_id]);
     }
 
-    function deleteSeat($seatid) {
-        $sql = "CALL `sp_deleteseat`({$seatid})";
-        $this->getData($sql);
-        return ["status" => "success", "message" => "the seat was deleted successfully"];
+    public function deleteSeat($seat_id) {
+        $sql = "CALL sp_Seat_Delete(?)";
+        $this->execute($sql, [$seat_id]);
+        return json_encode(["status" => "success", "message" => "Seat deleted successfully"]);
     }
 }
 ?>

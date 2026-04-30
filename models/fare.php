@@ -3,35 +3,31 @@ require_once("db.php");
 
 class Fare extends Db {
 
-    function checkFare($fareid, $flightid, $classid) {
-        $sql = "CALL `sp_checkfare`({$fareid},{$flightid},{$classid})";
-        return $this->getData($sql)->rowCount();
+    public function saveFare($flight_id, $flight_class_id, $unit_price) {
+        $sql = "CALL sp_Fare_Create(?, ?, ?)";
+        return $this->getJSON($sql, [$flight_id, $flight_class_id, $unit_price]);
     }
 
-    function saveFare($fareid, $flightid, $classid, $price) {
-        if ($this->checkFare($fareid, $flightid, $classid)) {
-            return ["status" => "exists", "message" => "fare already exists"];
-        } else {
-            $sql = "CALL `sp_savefare`({$fareid},{$flightid},{$classid},{$price})";
-            $this->getData($sql);
-            return ["status" => "success", "message" => "fare saved successfully"];
-        }
+    public function updateFare($fare_id, $flight_id, $flight_class_id, $unit_price) {
+        $sql = "CALL sp_Fare_Update(?, ?, ?, ?)";
+        $this->execute($sql, [$fare_id, $flight_id, $flight_class_id, $unit_price]);
+        return json_encode(["status" => "success", "message" => "Fare updated successfully"]);
     }
 
-    function getFares() {
-        $sql = "CALL `sp_getfares`()";
+    public function getFares() {
+        $sql = "CALL sp_Fare_SelectAll()";
         return $this->getJSON($sql);
     }
 
-    function getFareDetails($fareid) {
-        $sql = "CALL `sp_getfaredetails`({$fareid})";
-        return $this->getJSON($sql);
+    public function getFareDetails($fare_id) {
+        $sql = "CALL sp_Fare_SelectByID(?)";
+        return $this->getJSON($sql, [$fare_id]);
     }
 
-    function deleteFare($fareid) {
-        $sql = "CALL `sp_deletefare`({$fareid})";
-        $this->getData($sql);
-        return ["status" => "success", "message" => "the fare was deleted successfully"];
+    public function deleteFare($fare_id) {
+        $sql = "CALL sp_Fare_Delete(?)";
+        $this->execute($sql, [$fare_id]);
+        return json_encode(["status" => "success", "message" => "Fare deleted successfully"]);
     }
 }
 ?>

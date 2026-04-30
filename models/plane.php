@@ -3,35 +3,31 @@ require_once("db.php");
 
 class Plane extends Db {
 
-    function checkPlane($planeid, $planemodel) {
-        $sql = "CALL `sp_checkplane`({$planeid},'{$planemodel}')";
-        return $this->getData($sql)->rowCount();
+    public function savePlane($airline_id, $plane_model, $plane_capacity) {
+        $sql = "CALL sp_Plane_Create(?, ?, ?)";
+        return $this->getJSON($sql, [$airline_id, $plane_model, $plane_capacity]);
     }
 
-    function savePlane($planeid, $airlineid, $planemodel, $capacity) {
-        if ($this->checkPlane($planeid, $planemodel)) {
-            return ["status" => "exists", "message" => "plane already exists"];
-        } else {
-            $sql = "CALL `sp_saveplane`({$planeid},{$airlineid},'{$planemodel}',{$capacity})";
-            $this->getData($sql);
-            return ["status" => "success", "message" => "plane saved successfully"];
-        }
+    public function updatePlane($plane_id, $airline_id, $plane_model, $plane_capacity) {
+        $sql = "CALL sp_Plane_Update(?, ?, ?, ?)";
+        $this->execute($sql, [$plane_id, $airline_id, $plane_model, $plane_capacity]);
+        return json_encode(["status" => "success", "message" => "Plane updated successfully"]);
     }
 
-    function getPlanes() {
-        $sql = "CALL `sp_getplanes`()";
+    public function getPlanes() {
+        $sql = "CALL sp_Plane_SelectAll()";
         return $this->getJSON($sql);
     }
 
-    function getPlaneDetails($planeid) {
-        $sql = "CALL `sp_getplanedetails`({$planeid})";
-        return $this->getJSON($sql);
+    public function getPlaneDetails($plane_id) {
+        $sql = "CALL sp_Plane_SelectByID(?)";
+        return $this->getJSON($sql, [$plane_id]);
     }
 
-    function deletePlane($planeid) {
-        $sql = "CALL `sp_deleteplane`({$planeid})";
-        $this->getData($sql);
-        return ["status" => "success", "message" => "the plane was deleted successfully"];
+    public function deletePlane($plane_id) {
+        $sql = "CALL sp_Plane_Delete(?)";
+        $this->execute($sql, [$plane_id]);
+        return json_encode(["status" => "success", "message" => "Plane deleted successfully"]);
     }
 }
 ?>

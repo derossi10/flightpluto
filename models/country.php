@@ -3,35 +3,31 @@ require_once("db.php");
 
 class Country extends Db {
 
-    function checkCountry($countryid, $countryname) {
-        $sql = "CALL `sp_checkcountry`({$countryid},'{$countryname}')";
-        return $this->getData($sql)->rowCount();
+    public function saveCountry($country_name, $country_code) {
+        $sql = "CALL sp_Country_Create(?, ?)";
+        return $this->getJSON($sql, [$country_name, $country_code]);
     }
 
-    function saveCountry($countryid, $countryname) {
-        if ($this->checkCountry($countryid, $countryname)) {
-            return ["status" => "exists", "message" => "country name already exists"];
-        } else {
-            $sql = "CALL `sp_savecountry`({$countryid},'{$countryname}')";
-            $this->getData($sql);
-            return ["status" => "success", "message" => "country saved successfully"];
-        }
+    public function updateCountry($country_id, $country_name, $country_code) {
+        $sql = "CALL sp_Country_Update(?, ?, ?)";
+        $this->execute($sql, [$country_id, $country_name, $country_code]);
+        return json_encode(["status" => "success", "message" => "Country updated successfully"]);
     }
 
-    function getCountries() {
-        $sql = "CALL `sp_getcountries`()";
+    public function getCountries() {
+        $sql = "CALL sp_Country_SelectAll()";
         return $this->getJSON($sql);
     }
 
-    function getCountryDetails($countryid) {
-        $sql = "CALL `sp_getcountrydetails`({$countryid})";
-        return $this->getJSON($sql);
+    public function getCountryDetails($country_id) {
+        $sql = "CALL sp_Country_SelectByID(?)";
+        return $this->getJSON($sql, [$country_id]);
     }
 
-    function deleteCountry($countryid) {
-        $sql = "CALL `sp_deletecountry`({$countryid})";
-        $this->getData($sql);
-        return ["status" => "success", "message" => "the country was deleted successfully"];
+    public function deleteCountry($country_id) {
+        $sql = "CALL sp_Country_Delete(?)";
+        $this->execute($sql, [$country_id]);
+        return json_encode(["status" => "success", "message" => "Country deleted successfully"]);
     }
 }
 ?>

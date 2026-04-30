@@ -3,35 +3,31 @@ require_once("db.php");
 
 class Flight extends Db {
 
-    function checkFlight($flightid, $flightnumber) {
-        $sql = "CALL `sp_checkflight`({$flightid},'{$flightnumber}')";
-        return $this->getData($sql)->rowCount();
+    public function saveFlight($flight_number, $airline_id, $plane_id, $origin_id, $destination_id, $departure, $arrival, $duration) {
+        $sql = "CALL sp_Flight_Create(?, ?, ?, ?, ?, ?, ?, ?)";
+        return $this->getJSON($sql, [$flight_number, $airline_id, $plane_id, $origin_id, $destination_id, $departure, $arrival, $duration]);
     }
 
-    function saveFlight($flightid, $flightnumber, $airlineid, $planeid, $origin, $destination, $departure, $arrival, $duration) {
-        if ($this->checkFlight($flightid, $flightnumber)) {
-            return ["status" => "exists", "message" => "flight already exists"];
-        } else {
-            $sql = "CALL `sp_saveflight`({$flightid},'{$flightnumber}',{$airlineid},{$planeid},{$origin},{$destination},'{$departure}','{$arrival}',{$duration})";
-            $this->getData($sql);
-            return ["status" => "success", "message" => "flight saved successfully"];
-        }
+    public function updateFlight($flight_id, $flight_number, $airline_id, $plane_id, $origin_id, $destination_id, $departure, $arrival, $duration) {
+        $sql = "CALL sp_Flight_Update(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $this->execute($sql, [$flight_id, $flight_number, $airline_id, $plane_id, $origin_id, $destination_id, $departure, $arrival, $duration]);
+        return json_encode(["status" => "success", "message" => "Flight updated successfully"]);
     }
 
-    function getFlights() {
-        $sql = "CALL `sp_getflights`()";
+    public function getFlights() {
+        $sql = "CALL sp_Flight_SelectAll()";
         return $this->getJSON($sql);
     }
 
-    function getFlightDetails($flightid) {
-        $sql = "CALL `sp_getflightdetails`({$flightid})";
-        return $this->getJSON($sql);
+    public function getFlightDetails($flight_id) {
+        $sql = "CALL sp_Flight_SelectByID(?)";
+        return $this->getJSON($sql, [$flight_id]);
     }
 
-    function deleteFlight($flightid) {
-        $sql = "CALL `sp_deleteflight`({$flightid})";
-        $this->getData($sql);
-        return ["status" => "success", "message" => "the flight was deleted successfully"];
+    public function deleteFlight($flight_id) {
+        $sql = "CALL sp_Flight_Delete(?)";
+        $this->execute($sql, [$flight_id]);
+        return json_encode(["status" => "success", "message" => "Flight deleted successfully"]);
     }
 }
 ?>
