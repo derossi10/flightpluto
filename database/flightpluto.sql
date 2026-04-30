@@ -38,7 +38,7 @@ DELETE FROM airline WHERE airline_id=p_airline_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_airline_select_all`() BEGIN
-SELECT * FROM airline;
+SELECT a.*, c.country_name FROM airline a LEFT JOIN country c ON a.country_id = c.country_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_airline_select_by_id`(IN `p_airline_id` INT) BEGIN
@@ -63,7 +63,7 @@ DELETE FROM airport WHERE airport_id=p_airport_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_airport_select_all`() BEGIN
-SELECT * FROM airport;
+SELECT a.*, ci.city_name, co.country_name FROM airport a LEFT JOIN city ci ON a.city_id = ci.city_id LEFT JOIN country co ON ci.country_id = co.country_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_airport_select_by_id`(IN `p_airport_id` INT) BEGIN
@@ -88,7 +88,7 @@ DELETE FROM booking WHERE booking_id=p_booking_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_booking_select_all`() BEGIN
-SELECT * FROM booking;
+SELECT b.*, CONCAT(p.first_name, ' ', p.last_name) as passenger_name, f.flight_number, fc.flight_class_name FROM booking b LEFT JOIN passenger p ON b.passenger_id = p.passenger_id LEFT JOIN flight f ON b.flight_id = f.flight_id LEFT JOIN flight_class fc ON b.flight_class_id = fc.flight_class_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_booking_select_by_id`(IN `p_booking_id` INT) BEGIN
@@ -113,7 +113,7 @@ DELETE FROM city WHERE city_id=p_city_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_city_select_all`() BEGIN
-SELECT * FROM city;
+SELECT c.*, co.country_name FROM city c LEFT JOIN country co ON c.country_id = co.country_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_city_select_by_id`(IN `p_city_id` INT) BEGIN
@@ -163,7 +163,7 @@ DELETE FROM fare WHERE fare_id=p_fare_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_fare_select_all`() BEGIN
-SELECT * FROM fare;
+SELECT f.*, fl.flight_number, fc.flight_class_name FROM fare f LEFT JOIN flight fl ON f.flight_id = fl.flight_id LEFT JOIN flight_class fc ON f.flight_class_id = fc.flight_class_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_fare_select_by_id`(IN `p_fare_id` INT) BEGIN
@@ -213,7 +213,7 @@ DELETE FROM flight WHERE flight_id=p_flight_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_flight_select_all`() BEGIN
-SELECT * FROM flight;
+SELECT f.*, al.airline_name, ao.iata_code as origin_iata, ad.iata_code as destination_iata, p.plane_model FROM flight f LEFT JOIN airline al ON f.airline_id = al.airline_id LEFT JOIN airport ao ON f.origin_airport_id = ao.airport_id LEFT JOIN airport ad ON f.destination_airport_id = ad.airport_id LEFT JOIN plane p ON f.plane_id = p.plane_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_flight_select_by_id`(IN `p_flight_id` INT) BEGIN
@@ -263,7 +263,7 @@ DELETE FROM payment WHERE payment_id=p_payment_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_payment_select_all`() BEGIN
-SELECT * FROM payment;
+SELECT pay.*, b.booking_id, CONCAT(p.first_name, ' ', p.last_name) as passenger_name FROM payment pay LEFT JOIN booking b ON pay.booking_id = b.booking_id LEFT JOIN passenger p ON b.passenger_id = p.passenger_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_payment_select_by_id`(IN `p_payment_id` INT) BEGIN
@@ -288,7 +288,7 @@ DELETE FROM plane WHERE plane_id=p_plane_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_plane_select_all`() BEGIN
-SELECT * FROM plane;
+SELECT p.*, a.airline_name FROM plane p LEFT JOIN airline a ON p.airline_id = a.airline_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_plane_select_by_id`(IN `p_plane_id` INT) BEGIN
@@ -313,7 +313,7 @@ DELETE FROM seat WHERE seat_id=p_seat_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seat_select_all`() BEGIN
-SELECT * FROM seat;
+SELECT s.*, f.flight_number, fc.flight_class_name FROM seat s LEFT JOIN flight f ON s.flight_id = f.flight_id LEFT JOIN flight_class fc ON s.flight_class_id = fc.flight_class_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_seat_select_by_id`(IN `p_seat_id` INT) BEGIN
