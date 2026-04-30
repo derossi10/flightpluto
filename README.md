@@ -1,67 +1,69 @@
 # FlightPluto - Flight Management System
 
-FlightPluto is a robust, full-stack flight management system designed for efficient administration of airlines, airports, aircraft, and flight schedules. It features a modern, responsive interface and a secure user management module.
+FlightPluto is a comprehensive, full-stack flight management system designed for efficient administration of airlines, airports, aircraft, and flight schedules. It provides a modern, responsive interface with secure user management capabilities.
 
-## Key Features
+## Overview
 
-*   **Comprehensive Management Modules**:
-    *   **City Management**: Track international cities and their countries.
-    *   **Airport Management**: Manage global airports with IATA codes and city associations.
-    *   **Airline Management**: Maintain airline profiles, including IATA and ICAO codes.
-    *   **Aircraft Management**: Fleet tracking with model and capacity details.
-    *   **Flight Scheduling**: Manage complex flight schedules with origin/destination, times, and aircraft assignments.
-*   **Secure Authentication & Authorization**:
-    *   Salted SHA-256 password hashing.
-    *   Granular privilege management (Object-based access control).
-    *   System auditing (Track who added each record).
-*   **Modern User Interface**:
-    *   Responsive design powered by Bootstrap 4.
-    *   Sleek aesthetics with glassmorphism and subtle animations.
-    *   Dynamic data loading using AJAX/jQuery.
+FlightPluto enables aviation businesses to manage their operations through a centralized platform featuring:
+
+- **City & Airport Management**: Track international cities, countries, and airports with IATA codes
+- **Airline Management**: Maintain airline profiles with IATA and ICAO code identification
+- **Aircraft Management**: Fleet tracking with model specifications and capacity details
+- **Flight Scheduling**: Comprehensive scheduling with origin/destination routes, times, and aircraft assignments
 
 ## Technology Stack
 
-*   **Frontend**: HTML5, CSS3, JavaScript (ES6+), jQuery, Bootstrap 4, Font Awesome 5.
-*   **Backend**: PHP 8.0+.
-*   **Database**: MySQL/MariaDB (Stored Procedures for all CRUD operations).
-*   **Styling**: Modern CSS with glassmorphism effects and Google Fonts (Inter).
+| Layer | Technology |
+|-------|------------|
+| Frontend | HTML5, CSS3, JavaScript (ES6+), jQuery, Bootstrap 4, Font Awesome |
+| Backend | PHP 8.0+ |
+| Database | MySQL/MariaDB with Stored Procedures |
+| Styling | Modern CSS with glassmorphism effects, Google Fonts (Inter) |
 
-## Prerequisites
+## Security Features
 
-*   **Web Server**: Apache (XAMPP/WAMP recommended).
-*   **PHP**: Version 8.0 or higher.
-*   **Database**: MySQL 5.7+ or MariaDB 10.4+.
+- **Password Security**: Unique 20-character random salt per user, SHA-256 hashing
+- **Access Control**: Object-based privilege management system
+- **Session Management**: Secure PHP sessions with audit trails
+- **Input Validation**: Sanitized queries via prepared statements
 
-## Installation & Setup
+## Getting Started
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/derossi10/flightpluto.git
-    ```
-2.  **Database Setup**:
-    *   Create a database named `flightpluto`.
-    *   Import `database/flightpluto.sql` to set up the core tables and flight data.
-    *   Import `database/security_setup.sql` to set up the user management system and stored procedures.
-3.  **Configuration**:
-    *   Open `models/db.php` and update your database credentials (`host`, `username`, `password`).
-4.  **First User Setup**:
-    *   Navigate to `setup_first_user.html` in your browser to create the initial system administrator account.
+### Prerequisites
 
-## Architecture
+- Web Server (Apache via XAMPP/WAMP)
+- PHP 8.0 or higher
+- MySQL 5.7+ or MariaDB 10.4+
 
-FlightPluto follows a modular architecture:
-*   **Models**: PHP classes handling database interactions via Stored Procedures.
-*   **Controllers**: API endpoints that bridge the frontend and models.
-*   **Assets**: Modular JavaScript files and modern CSS styling.
-*   **Database**: Logic is centralized in SQL Stored Procedures for performance and security.
+### Installation
 
-## Security
+1. Clone the repository:
+   ```
+   git clone https://github.com/derossi10/flightpluto.git
+   ```
 
-The system employs a multi-layered security approach:
-*   **Password Security**: Every user has a unique 20-character random salt. Passwords are hashed using SHA-256 (Password + Salt).
-*   **Access Control**: A dedicated `user_privileges` table determines which modules each staff member can access.
-*   **Session Management**: Secure PHP sessions track user state across the application.
+2. Set up the database:
+   - Create a database named `flightpluto`
+   - Import `database/flightpluto.sql`
+   - Import `database/security_setup.sql`
+
+3. Configure database credentials in `models/db.php`
+
+4. Create your initial administrator account by visiting `setup_first_user.html`
+
+## Project Structure
+
+```
+flightpluto/
+├── assets/
+│   ├── css/           # Stylesheets
+│   └── js/            # Frontend JavaScript
+├── controllers/       # Business logic layer
+├── database/         # SQL scripts and schema
+├── models/           # Data access layer
+└── *.html            # Frontend pages
+```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License - See LICENSE file for details.
