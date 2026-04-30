@@ -1,4 +1,5 @@
 # FlightPluto - Flight Management System
+IBL 3.3
 
 FlightPluto is a comprehensive, full-stack flight management system designed for efficient administration of airlines, airports, aircraft, and flight schedules. It provides a modern, responsive interface with secure user management capabilities.
 
@@ -63,7 +64,3 @@ flightpluto/
 ├── models/           # Data access layer
 └── *.html            # Frontend pages
 ```
-
-## License
-
-MIT License - See LICENSE file for details.
