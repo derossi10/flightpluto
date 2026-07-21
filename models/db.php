@@ -2,12 +2,20 @@
 session_start();
 
 class Db {
-    private $host = "localhost";
-    private $db_name = "flightpluto";
-    private $username = "root";
-    private $password = "";
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
     private $charset = "utf8mb4";
     private $conn = null;
+
+    public function __construct() {
+        // Support environment variables for Docker, fallback to defaults for local development
+        $this->host = getenv('DB_HOST') ?: "localhost";
+        $this->db_name = getenv('DB_NAME') ?: "flightpluto";
+        $this->username = getenv('DB_USER') ?: "root";
+        $this->password = getenv('DB_PASSWORD') ?: "";
+    }
 
     public function connect() {
         if ($this->conn === null) {

@@ -30,13 +30,34 @@ FlightPluto enables aviation businesses to manage their operations through a cen
 
 ## Getting Started
 
-### Prerequisites
+### Quick Start with Docker (Recommended)
+
+The easiest way to get FlightPluto running is with Docker:
+
+```bash
+# Clone the repository
+git clone https://github.com/derossi10/flightpluto.git
+cd flightpluto
+
+# Start services with Docker Compose
+docker-compose up --build
+
+# Access the application
+# - Application: http://localhost:8080
+# - Database: mariadb:3306
+```
+
+See [README_DOCKER.md](README_DOCKER.md) for detailed Docker instructions, troubleshooting, and commands.
+
+### Local Development Setup
+
+#### Prerequisites
 
 - Web Server (Apache via XAMPP/WAMP)
 - PHP 8.0 or higher
 - MySQL 5.7+ or MariaDB 10.4+
 
-### Installation
+#### Installation
 
 1. Clone the repository:
    ```
@@ -48,9 +69,17 @@ FlightPluto enables aviation businesses to manage their operations through a cen
    - Import `database/flightpluto.sql`
    - Import `database/security_setup.sql`
 
-3. Configure database credentials in `models/db.php`
+3. Configure database credentials in `models/db.php` (or set environment variables):
+   ```php
+   DB_HOST=localhost
+   DB_USER=root
+   DB_PASSWORD=your_password
+   DB_NAME=flightpluto
+   ```
 
 4. Create your initial administrator account by visiting `setup_first_user.html`
+
+5. Start your local web server (Apache/XAMPP)
 
 ## Project Structure
 

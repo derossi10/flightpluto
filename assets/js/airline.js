@@ -34,12 +34,22 @@ $(document).ready(function () {
 
     // Load countries for dropdowns
     function loadCountries(target, firstOption) {
-        $.getJSON('controllers/country_ops.php?getcountries=true', function (data) {
-            let options = `<option value="">-- ${firstOption} --</option>`;
-            data.forEach(country => {
-                options += `<option value="${country['country_id']}">${country['country_name']}</option>`;
-            });
-            target.html(options);
+        $.ajax({
+            url: 'controllers/country_ops.php?getcountries=true',
+            dataType: 'json',
+            success: function (data) {
+                let options = `<option value="">-- ${firstOption} --</option>`;
+                if (Array.isArray(data)) {
+                    data.forEach(country => {
+                        options += `<option value="${country['country_id']}">${country['country_name']}</option>`;
+                    });
+                }
+                target.html(options);
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading countries: ' + errorMsg.substring(0, 100));
+            }
         });
     }
 
@@ -50,47 +60,50 @@ $(document).ready(function () {
 
         let url = 'controllers/airline_ops.php?getairlines=true';
         
-        $.getJSON(url, function (data) {
-            let filteredData = data;
-            
-            if (countryId) {
-                filteredData = filteredData.filter(a => a.country_id == countryId);
-            }
-            if (airlineName) {
-                const search = airlineName.toLowerCase();
-                filteredData = filteredData.filter(a => 
-                    a.airline_name.toLowerCase().includes(search) || 
-                    a.iata_code.toLowerCase().includes(search) ||
-                    a.icao_code.toLowerCase().includes(search)
-                );
-            }
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            success: function (data) {
+                let filteredData = Array.isArray(data) ? data : [];
+                
+                if (countryId) {
+                    filteredData = filteredData.filter(a => a.country_id == countryId);
+                }
+                if (airlineName) {
+                    const search = airlineName.toLowerCase();
+                    filteredData = filteredData.filter(a => 
+                        a.airline_name.toLowerCase().includes(search) || 
+                        a.iata_code.toLowerCase().includes(search) ||
+                        a.icao_code.toLowerCase().includes(search)
+                    );
+                }
 
-            let rows = '';
-            filteredData.forEach((airline, index) => {
-                rows += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${airline['airline_name']}</td>
-                        <td><span class="badge badge-primary badge-pill">${airline['iata_code']}</span></td>
-                        <td><span class="badge badge-secondary badge-pill">${airline['icao_code']}</span></td>
-                        <td>${airline['country_name'] || 'N/A'}</td>
-                        <td class="text-right">
-                            <button class="btn btn-primary btn-sm btn-edit" 
-                                data-id="${airline['airline_id']}" 
-                                data-name="${airline['airline_name']}" 
-                                data-iata="${airline['iata_code']}" 
-                                data-icao="${airline['icao_code']}" 
-                                data-country="${airline['country_id']}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm btn-delete" data-id="${airline['airline_id']}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            airlinesList.html(rows || '<tr><td colspan="6" class="text-center p-4 text-muted">No airlines found</td></tr>');
+                let rows = '';
+                filteredData.forEach((airline, index) => {
+                    rows += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${airline['airline_name']}</td>
+                            <td><span class="badge badge-primary badge-pill">${airline['iata_code']}</span></td>
+                            <td><span class="badge badge-secondary badge-pill">${airline['icao_code']}</span></td>
+                            <td>${airline['country_name'] || 'N/A'}</td>
+                            <td class="text-right">
+                                <button class="btn btn-primary btn-sm btn-edit" 
+                                    data-id="${airline['airline_id']}" 
+                                    data-name="${airline['airline_name']}" 
+                                    data-iata="${airline['iata_code']}" 
+                                    data-icao="${airline['icao_code']}" 
+                                    data-country="${airline['country_id']}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm btn-delete" data-id="${airline['airline_id']}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                airlinesList.html(rows || '<tr><td colspan="6" class="text-center p-4 text-muted">No airlines found</td></tr>');
 
             // Action Bindings
             $('.btn-edit').on('click', function () {
@@ -111,10 +124,20 @@ $(document).ready(function () {
                         if (res.status === 'success') {
                             loadAirlines();
                             showNotification(filterNotifications, 'success', res.message);
+                        } else {
+                            showNotification(filterNotifications, 'danger', res.message || 'Failed to delete airline');
                         }
-                    }, 'json');
+                    }, 'json').fail(function (res) {
+                        showNotification(filterNotifications, 'danger', 'Error deleting airline: ' + (res.statusText || 'Unknown error'));
+                    });
                 }
             });
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading airlines: ' + errorMsg.substring(0, 100));
+                airlinesList.html('<tr><td colspan="6" class="text-center p-4 text-danger">Error loading data</td></tr>');
+            }
         });
     }
 

@@ -1,0 +1,26 @@
+FROM php:8.0-fpm
+
+# Install required PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Install additional packages
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY . /var/www/html/
+
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
+
+# Expose port
+EXPOSE 9000
+
+# Start PHP-FPM
+CMD ["php-fpm"]

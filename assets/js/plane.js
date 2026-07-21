@@ -31,12 +31,22 @@ $(document).ready(function () {
 
     // Functions
     function loadAirlines(target, firstOption) {
-        $.getJSON('controllers/airline_ops.php?getairlines=true', function (data) {
-            let options = `<option value="">-- ${firstOption} --</option>`;
-            data.forEach(item => {
-                options += `<option value="${item.airline_id}">${item.airline_name}</option>`;
-            });
-            target.html(options);
+        $.ajax({
+            url: 'controllers/airline_ops.php?getairlines=true',
+            dataType: 'json',
+            success: function (data) {
+                let options = `<option value="">-- ${firstOption} --</option>`;
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        options += `<option value="${item.airline_id}">${item.airline_name}</option>`;
+                    });
+                }
+                target.html(options);
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading airlines: ' + errorMsg.substring(0, 100));
+            }
         });
     }
 
@@ -44,8 +54,11 @@ $(document).ready(function () {
         const airlineId = filterAirline.val();
         const modelName = $('#filter_plane_model').val().toLowerCase();
 
-        $.getJSON('controllers/plane_ops.php?getplanes=true', function (data) {
-            let filteredData = data;
+        $.ajax({
+            url: 'controllers/plane_ops.php?getplanes=true',
+            dataType: 'json',
+            success: function (data) {
+                let filteredData = Array.isArray(data) ? data : [];
             
             if (airlineId) filteredData = filteredData.filter(p => p.airline_id == airlineId);
             if (modelName) filteredData = filteredData.filter(p => p.plane_model.toLowerCase().includes(modelName));
@@ -93,10 +106,20 @@ $(document).ready(function () {
                         if (res.status === 'success') {
                             loadPlanes();
                             showNotification(filterNotifications, 'success', res.message);
+                        } else {
+                            showNotification(filterNotifications, 'danger', res.message || 'Failed to delete aircraft');
                         }
-                    }, 'json');
+                    }, 'json').fail(function (res) {
+                        showNotification(filterNotifications, 'danger', 'Error deleting aircraft: ' + (res.statusText || 'Unknown error'));
+                    });
                 }
             });
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading aircraft: ' + errorMsg.substring(0, 100));
+                planesList.html('<tr><td colspan="5" class="text-center p-4 text-danger">Error loading data</td></tr>');
+            }
         });
     }
 
@@ -125,7 +148,9 @@ $(document).ready(function () {
             } else {
                 showNotification(modalNotifications, 'danger', res.message || res);
             }
-        }, 'json');
+        }, 'json').fail(function (res) {
+            showNotification(modalNotifications, 'danger', 'Error saving aircraft: ' + (res.statusText || 'Unknown error'));
+        });
     }
 
     function resetModal() {

@@ -34,12 +34,22 @@ $(document).ready(function () {
 
     // Load cities for dropdowns
     function loadCities(target, firstOption) {
-        $.getJSON('controllers/city_ops.php?getcities=true', function (data) {
-            let options = `<option value="">-- ${firstOption} --</option>`;
-            data.forEach(city => {
-                options += `<option value="${city['city_id']}">${city['city_name']}</option>`;
-            });
-            target.html(options);
+        $.ajax({
+            url: 'controllers/city_ops.php?getcities=true',
+            dataType: 'json',
+            success: function (data) {
+                let options = `<option value="">-- ${firstOption} --</option>`;
+                if (Array.isArray(data)) {
+                    data.forEach(city => {
+                        options += `<option value="${city['city_id']}">${city['city_name']}</option>`;
+                    });
+                }
+                target.html(options);
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading cities: ' + errorMsg.substring(0, 100));
+            }
         });
     }
 
@@ -51,22 +61,25 @@ $(document).ready(function () {
         let url = 'controllers/airport_ops.php?getairports=true';
         // Filtering will be handled client-side if API doesn't support params
         
-        $.getJSON(url, function (data) {
-            let filteredData = data;
-            
-            if (cityId) {
-                filteredData = filteredData.filter(a => a.city_id == cityId);
-            }
-            if (airportName) {
-                const search = airportName.toLowerCase();
-                filteredData = filteredData.filter(a => 
-                    a.airport_name.toLowerCase().includes(search) || 
-                    a.iata_code.toLowerCase().includes(search)
-                );
-            }
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            success: function (data) {
+                let filteredData = Array.isArray(data) ? data : [];
+                
+                if (cityId) {
+                    filteredData = filteredData.filter(a => a.city_id == cityId);
+                }
+                if (airportName) {
+                    const search = airportName.toLowerCase();
+                    filteredData = filteredData.filter(a => 
+                        a.airport_name.toLowerCase().includes(search) || 
+                        a.iata_code.toLowerCase().includes(search)
+                    );
+                }
 
-            let rows = '';
-            filteredData.forEach((airport, index) => {
+                let rows = '';
+                filteredData.forEach((airport, index) => {
                 rows += `
                     <tr>
                         <td>${index + 1}</td>
@@ -109,10 +122,20 @@ $(document).ready(function () {
                         if (res.status === 'success') {
                             loadAirports();
                             showNotification(filterNotifications, 'success', res.message);
+                        } else {
+                            showNotification(filterNotifications, 'danger', res.message || 'Failed to delete airport');
                         }
-                    }, 'json');
+                    }, 'json').fail(function (res) {
+                        showNotification(filterNotifications, 'danger', 'Error deleting airport: ' + (res.statusText || 'Unknown error'));
+                    });
                 }
             });
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading airports: ' + errorMsg.substring(0, 100));
+                airportsList.html('<tr><td colspan="6" class="text-center p-4 text-danger">Error loading data</td></tr>');
+            }
         });
     }
 

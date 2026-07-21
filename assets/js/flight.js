@@ -25,8 +25,16 @@ $(document).ready(function () {
     loadAirports(modalDestination, 'Select Destination');
     
     // Load planes cache
-    $.getJSON('controllers/plane_ops.php?getplanes=true', function(data) {
-        allPlanes = data;
+    $.ajax({
+        url: 'controllers/plane_ops.php?getplanes=true',
+        dataType: 'json',
+        success: function(data) {
+            allPlanes = Array.isArray(data) ? data : [];
+        },
+        error: function (xhr, status, error) {
+            const errorMsg = xhr.responseText || error || 'Unknown error';
+            showNotification(filterNotifications, 'danger', 'Error loading aircraft: ' + errorMsg.substring(0, 100));
+        }
     });
 
     loadFlights();
@@ -58,22 +66,42 @@ $(document).ready(function () {
 
     // Functions
     function loadAirlines(target, firstOption) {
-        $.getJSON('controllers/airline_ops.php?getairlines=true', function (data) {
-            let options = `<option value="">-- ${firstOption} --</option>`;
-            data.forEach(item => {
-                options += `<option value="${item.airline_id}">${item.airline_name}</option>`;
-            });
-            target.html(options);
+        $.ajax({
+            url: 'controllers/airline_ops.php?getairlines=true',
+            dataType: 'json',
+            success: function (data) {
+                let options = `<option value="">-- ${firstOption} --</option>`;
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        options += `<option value="${item.airline_id}">${item.airline_name}</option>`;
+                    });
+                }
+                target.html(options);
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading airlines: ' + errorMsg.substring(0, 100));
+            }
         });
     }
 
     function loadAirports(target, firstOption) {
-        $.getJSON('controllers/airport_ops.php?getairports=true', function (data) {
-            let options = `<option value="">-- ${firstOption} --</option>`;
-            data.forEach(item => {
-                options += `<option value="${item.airport_id}">${item.airport_name} (${item.iata_code})</option>`;
-            });
-            target.html(options);
+        $.ajax({
+            url: 'controllers/airport_ops.php?getairports=true',
+            dataType: 'json',
+            success: function (data) {
+                let options = `<option value="">-- ${firstOption} --</option>`;
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        options += `<option value="${item.airport_id}">${item.airport_name} (${item.iata_code})</option>`;
+                    });
+                }
+                target.html(options);
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading airports: ' + errorMsg.substring(0, 100));
+            }
         });
     }
 
@@ -82,8 +110,11 @@ $(document).ready(function () {
         const originId = filterOrigin.val();
         const destId = filterDestination.val();
 
-        $.getJSON('controllers/flight_ops.php?getflights=true', function (data) {
-            let filteredData = data;
+        $.ajax({
+            url: 'controllers/flight_ops.php?getflights=true',
+            dataType: 'json',
+            success: function (data) {
+                let filteredData = Array.isArray(data) ? data : [];
             
             if (airlineId) filteredData = filteredData.filter(f => f.airline_id == airlineId);
             if (originId) filteredData = filteredData.filter(f => f.origin_airport_id == originId);
@@ -133,10 +164,20 @@ $(document).ready(function () {
                         if (res.status === 'success') {
                             loadFlights();
                             showNotification(filterNotifications, 'success', res.message);
+                        } else {
+                            showNotification(filterNotifications, 'danger', res.message || 'Failed to delete flight');
                         }
-                    }, 'json');
+                    }, 'json').fail(function (res) {
+                        showNotification(filterNotifications, 'danger', 'Error deleting flight: ' + (res.statusText || 'Unknown error'));
+                    });
                 }
             });
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading flights: ' + errorMsg.substring(0, 100));
+                flightsList.html('<tr><td colspan="8" class="text-center p-4 text-danger">Error loading data</td></tr>');
+            }
         });
     }
 
@@ -173,11 +214,16 @@ $(document).ready(function () {
             } else {
                 showNotification(modalNotifications, 'danger', res.message || res);
             }
-        }, 'json');
+        }, 'json').fail(function (res) {
+            showNotification(modalNotifications, 'danger', 'Error saving flight: ' + (res.statusText || 'Unknown error'));
+        });
     }
 
     function editFlight(id) {
-        $.getJSON(`controllers/flight_ops.php?getflightdetails=true&flightid=${id}`, function(res) {
+        $.ajax({
+            url: `controllers/flight_ops.php?getflightdetails=true&flightid=${id}`,
+            dataType: 'json',
+            success: function(res) {
             const data = Array.isArray(res) ? res[0] : res;
             if (data) {
                 $('#flight_id').val(data.flight_id);
@@ -199,6 +245,11 @@ $(document).ready(function () {
                 $('#flight_duration').val(data.duration_minutes);
                 $('#modal_title').text('Edit Flight Schedule');
                 flightModal.modal('show');
+                }
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showNotification(filterNotifications, 'danger', 'Error loading flight details: ' + errorMsg.substring(0, 100));
             }
         });
     }

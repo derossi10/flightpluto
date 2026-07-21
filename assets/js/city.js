@@ -34,15 +34,22 @@ $(document).ready(function () {
 
     // Functions
     function loadCountries(target, firstOption) {
-        $.getJSON('controllers/country_ops.php?getcountries=true', function (data) {
-            let options = `<option value="">-- ${firstOption} --</option>`;
-            data.forEach(country => {
-                // Using column names with spaces as returned by the API
-                options += `<option value="${country['country_id']}">${country['country_name']}</option>`;
-            });
-            target.html(options);
-        }).fail(function (res) {
-            showError(filterNotifications, "Error loading countries: " + res.statusText);
+        $.ajax({
+            url: 'controllers/country_ops.php?getcountries=true',
+            dataType: 'json',
+            success: function (data) {
+                let options = `<option value="">-- ${firstOption} --</option>`;
+                if (Array.isArray(data)) {
+                    data.forEach(country => {
+                        options += `<option value="${country['country_id']}">${country['country_name']}</option>`;
+                    });
+                }
+                target.html(options);
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showError(filterNotifications, "Error loading countries: " + errorMsg.substring(0, 100));
+            }
         });
     }
 
@@ -54,40 +61,51 @@ $(document).ready(function () {
         if (countryId) url += '&countryid=' + countryId;
         if (cityName) url += '&cityname=' + cityName;
 
-        $.getJSON(url, function (data) {
-            let rows = '';
-            data.forEach((city, index) => {
-                rows += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${city['country_name']}</td>
-                        <td>${city['city_name']}</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td class="text-right">
-                            <button class="btn btn-primary btn-sm btn-edit" data-id="${city['city_id']}" data-name="${city['city_name']}" data-country="${city['country_id']}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            citiesList.html(rows);
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            success: function (data) {
+                let rows = '';
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach((city, index) => {
+                        rows += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${city['country_name']}</td>
+                                <td>${city['city_name']}</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td class="text-right">
+                                    <button class="btn btn-primary btn-sm btn-edit" data-id="${city['city_id']}" data-name="${city['city_name']}" data-country="${city['country_id']}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    rows = '<tr><td colspan="6" class="text-center p-4 text-muted">No cities found</td></tr>';
+                }
+                citiesList.html(rows);
 
-            // Bind edit buttons
-            $('.btn-edit').on('click', function () {
-                const id = $(this).data('id');
-                const name = $(this).data('name');
-                const country = $(this).data('country');
+                // Bind edit buttons
+                $('.btn-edit').on('click', function () {
+                    const id = $(this).data('id');
+                    const name = $(this).data('name');
+                    const country = $(this).data('country');
 
-                $('#city_id').val(id);
-                $('#city_name').val(name);
-                $('#city_country').val(country);
-                $('#modal_title').text('Edit City');
-                cityModal.modal('show');
-            });
-        }).fail(function (res) {
-            showError(filterNotifications, "Error loading cities.");
+                    $('#city_id').val(id);
+                    $('#city_name').val(name);
+                    $('#city_country').val(country);
+                    $('#modal_title').text('Edit City');
+                    cityModal.modal('show');
+                });
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseText || error || 'Unknown error';
+                showError(filterNotifications, "Error loading cities: " + errorMsg.substring(0, 100));
+                citiesList.html('<tr><td colspan="6" class="text-center p-4 text-danger">Error loading data</td></tr>');
+            }
         });
     }
 
